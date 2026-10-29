@@ -1,0 +1,24 @@
+# Sunucuya özel / gizli
+site/config/app.php
+site/config/deploy*.php
+site/config/debug.php
+
+# Çalışma zamanı verisi
+site/storage/sessions/*
+site/storage/logs/*
+site/storage/cache/*
+site/storage/incoming/
+site/data/cache/*
+!site/storage/**/.gitkeep
+!site/data/cache/.gitkeep
+
+# Medya (git dışında, ayrı yedeklenir)
+site/uploads/20*/
+site/storage/uploads/reviews/*
+
+# Yerel geliştirme
+/docker/db-init/*.sql
+/dist/
+.DS_Store
+.idea/
+.vscode/

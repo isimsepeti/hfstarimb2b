@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="HFS Tarım">
+  <rect width="120" height="120" rx="24" fill="#1b4332"/>
+  <path d="M28 78c18-28 28-44 32-58 4 14 14 30 32 58" fill="none" stroke="#d4b45a" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="60" cy="28" r="8" fill="#2d6a4f" stroke="#d4b45a" stroke-width="3"/>
+  <text x="60" y="102" text-anchor="middle" fill="#fff" font-family="Georgia,serif" font-size="22" font-weight="700">HFS</text>
+</svg>

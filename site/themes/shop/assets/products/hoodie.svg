@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#14080c"/>
+  <path d="M260 280 L400 220 L540 280 L580 820 L220 820 Z" fill="#5A0E27"/>
+  <path d="M300 200 Q400 140 500 200 L540 280 L260 280 Z" fill="#3D091B"/>
+  <ellipse cx="400" cy="210" rx="70" ry="36" fill="#2a0812"/>
+  <rect x="300" y="420" width="200" height="140" rx="16" fill="#3D091B"/>
+  <circle cx="400" cy="380" r="28" fill="#D39D3F"/>
+  <text x="400" y="388" text-anchor="middle" fill="#5A0E27" font-family="Georgia" font-size="14" font-weight="700">BMN</text>
+</svg>

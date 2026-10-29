@@ -1,0 +1,4 @@
+Require all denied
+<Files "*.sql">
+Require all denied
+</Files>

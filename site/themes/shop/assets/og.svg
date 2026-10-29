@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3D091B"/>
+      <stop offset="1" stop-color="#75B7E5"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#g)"/>
+  <text x="80" y="300" fill="#D39D3F" font-family="Georgia, serif" font-size="28" letter-spacing="8">26 / 27</text>
+  <text x="80" y="390" fill="#FFFFFF" font-family="Georgia, serif" font-size="72">BMN Maaza</text>
+  <text x="80" y="450" fill="#75B7E5" font-family="Georgia, serif" font-size="28">Trabzonspor taraftar koleksiyonu</text>
+</svg>
