@@ -3,5 +3,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=$HOME/b2b.hfstarim.com/
+    - export DEPLOYPATH=$HOME/public_html/
     - /bin/rsync -rlptD --delete --exclude 'config/app.php' --exclude 'uploads/20*/' --exclude 'storage/sessions/*' --exclude 'storage/logs/*' --exclude 'storage/cache/*' --exclude 'storage/uploads/reviews/*' --exclude 'data/cache/*' --exclude '.well-known/' --exclude 'cgi-bin/' --exclude '.user.ini' --exclude 'php.ini' --exclude 'error_log' site/ $DEPLOYPATH

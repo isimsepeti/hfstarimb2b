@@ -4,7 +4,7 @@ Bayi sipariş sistemi. Saf PHP 8.4 + MySQL, framework yok. cPanel paylaşımlı 
 Apache + `.htaccess` ile çalışır; tek giriş noktası `site/index.php`.
 
 ```
-site/            → sunucudaki b2b.hfstarim.com klasörünün içeriği (document root)
+site/            → sunucudaki public_html klasörünün içeriği (document root)
   app/           → uygulama sınıfları (web'den kapalı)
   cli/sync.php   → cron: Bulut/Bayt senkronu (web'den kapalı)
   config/        → app.php sunucuya özel, git'e girmez (örnek: app.example.php)
@@ -37,7 +37,7 @@ open http://localhost:8088
 
 1. cPanel > **Git Version Control** > Create: depo URL'si, yol `~/repositories/b2b`.
 2. Değişiklikleri `main`'e push edin, cPanel'de **Update from Remote** → **Deploy HEAD Commit**.
-   `.cpanel.yml` yalnızca `site/` klasörünü `~/b2b.hfstarim.com/` altına kopyalar;
+   `.cpanel.yml` yalnızca `site/` klasörünü `~/public_html/` altına kopyalar;
    `config/app.php`, `uploads/`, oturumlar ve loglar korunur.
 3. cPanel PHP sürüm seçicisi `.htaccess`'e kendi bloğunu eklerse o bloğu
    `site/.htaccess`'e de ekleyin, yoksa deploy bunu siler.
@@ -46,7 +46,7 @@ open http://localhost:8088
 
 - PHP 8.4 (en az 8.2). Eklentiler: pdo_mysql, curl, mbstring, zip, gd, intl, xml (simplexml), iconv
 - MySQL 8 / MariaDB 10.6+
-- Cron (5 dk): `/usr/local/bin/php $HOME/b2b.hfstarim.com/cli/sync.php >/dev/null 2>&1`
+- Cron (5 dk): `/usr/local/bin/php $HOME/public_html/cli/sync.php >/dev/null 2>&1`
 
 ## Entegrasyonlar
 

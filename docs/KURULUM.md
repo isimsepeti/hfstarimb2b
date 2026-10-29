@@ -9,8 +9,8 @@ edilir. Elle yüklenen yalnızca git'te olmayanlardır: ürün görselleri, ayar
 |---|---|---|
 | `b2b-veritabani.sql` | phpMyAdmin → yeni veritabanı | 6 |
 | `b2b-guvenlik.sql` | phpMyAdmin → aynı veritabanı, yukarıdakinden sonra | 6 |
-| `b2b-uploads.zip` | `~/b2b.hfstarim.com/` içinde çıkar | 5 |
-| `app.php` | `~/b2b.hfstarim.com/config/app.php` | 7 |
+| `b2b-uploads.zip` | `~/public_html/` içinde çıkar | 5 |
+| `app.php` | `~/public_html/config/app.php` | 7 |
 
 `KULLANICI` aşağıda yeni cPanel kullanıcı adınızdır.
 
@@ -23,15 +23,11 @@ cPanel → **Select PHP Version** (CloudLinux):
 - Sürüm: **8.4**
 - Eklentiler işaretli olmalı: `pdo_mysql`, `mysqlnd`, `curl`, `mbstring`, `zip`, `gd`, `intl`, `xml`, `simplexml`, `iconv`, `opcache`
 
-## 2. Subdomain
+## 2. Site klasörü
 
-cPanel → **Domains** → **Create A New Domain**
-
-- Domain: `b2b.hfstarim.com`
-- "Share document root" işaretini **kaldırın**
-- Document Root: `b2b.hfstarim.com` (yani `/home/KULLANICI/b2b.hfstarim.com`)
-
-> Farklı bir klasör seçerseniz depodaki `.cpanel.yml` içindeki `DEPLOYPATH` satırını ona göre değiştirin.
+`b2b.hfstarim.com` bu cPanel hesabının **ana alan adı**; site dosyaları `public_html` klasöründe
+(`/home/KULLANICI/public_html`). Ayrı subdomain açmaya gerek yok. Depodaki `.cpanel.yml` kodu
+bu klasöre kopyalar.
 
 ## 3. GitHub erişimi
 
@@ -64,15 +60,15 @@ cPanel → **Git™ Version Control** → **Create**
 
 Oluşunca **Manage** → **Pull or Deploy** sekmesi → **Deploy HEAD Commit**.
 
-Kontrol: File Manager'da `b2b.hfstarim.com/` içinde `index.php`, `app/`, `themes/`, `cli/` görünmeli.
+Kontrol: File Manager'da `public_html/` içinde `index.php`, `app/`, `themes/`, `cli/` görünmeli.
 
-> Deploy, depodaki `.cpanel.yml`'ı çalıştırır: `site/` klasörünü `~/b2b.hfstarim.com/` altına kopyalar.
+> Deploy, depodaki `.cpanel.yml`'ı çalıştırır: `site/` klasörünü `~/public_html/` altına kopyalar.
 > `config/app.php`, `uploads/`, oturumlar ve loglar her deploy'da korunur.
 
 ## 5. Ürün görselleri
 
-File Manager → `b2b.hfstarim.com/` → **Upload** → `b2b-uploads.zip` → sağ tık **Extract**
-(hedef: `/b2b.hfstarim.com`). `uploads/2020`, `uploads/2026` vb. klasörler oluşmalı. Zip'i silin.
+File Manager → `public_html/` → **Upload** → `b2b-uploads.zip` → sağ tık **Extract**
+(hedef: `/public_html`). `uploads/2020`, `uploads/2026` vb. klasörler oluşmalı. Zip'i silin.
 
 ## 6. Veritabanı
 
@@ -92,7 +88,7 @@ cPanel → **phpMyAdmin** → soldan `KULLANICI_b2b` → **İçe Aktar**:
 
 ## 7. Ayar dosyası
 
-File Manager → `b2b.hfstarim.com/config/` → `app.php`'yi yükleyin → **Edit**:
+File Manager → `public_html/config/` → `app.php`'yi yükleyin → **Edit**:
 
 ```php
 'db' => [
@@ -110,10 +106,10 @@ File Manager → `b2b.hfstarim.com/config/` → `app.php`'yi yükleyin → **Edi
 cPanel → **Cron Jobs** → Common Settings: **Once Per Five Minutes** (`*/5 * * * *`), komut:
 
 ```
-/usr/local/bin/php /home/KULLANICI/b2b.hfstarim.com/cli/sync.php >/dev/null 2>&1
+/usr/local/bin/php /home/KULLANICI/public_html/cli/sync.php >/dev/null 2>&1
 ```
 
-Elle denemek için Terminal: `php ~/b2b.hfstarim.com/cli/sync.php` → 5 satır `phase=...` yazmalı.
+Elle denemek için Terminal: `php ~/public_html/cli/sync.php` → 5 satır `phase=...` yazmalı.
 
 > Eski sunucudaki `curl .../hfs-sync/?k=...` cron'u **kullanılmaz**.
 
@@ -167,8 +163,8 @@ cPanel → Git Version Control → Manage → Pull or Deploy → Update from Rem
 | Belirti | Çözüm |
 |---|---|
 | Deploy "rsync: not found" | `.cpanel.yml`'da `/bin/rsync` yerine `/usr/bin/rsync` deneyin |
-| Her sayfa 500 | PHP 8.4 ve 1. adımdaki eklentiler; hata için `b2b.hfstarim.com/error_log` |
+| Her sayfa 500 | PHP 8.4 ve 1. adımdaki eklentiler; hata için `public_html/error_log` |
 | "config/app.php yok" | 7. adım; dosya adı tam `app.php` olmalı |
 | Veritabanı bağlantı hatası | `app.php`'deki ad/kullanıcıda `KULLANICI_` öneki; kullanıcıya yetki verildi mi |
-| Görseller yok | 5. adım: `uploads/2026/...` doğrudan `b2b.hfstarim.com/` altında olmalı |
+| Görseller yok | 5. adım: `uploads/2026/...` doğrudan `public_html/` altında olmalı |
 | PHP sürümü deploy sonrası değişiyor | cPanel `.htaccess`'e handler bloğu eklediyse o bloğu depodaki `site/.htaccess`'e de ekleyin |
