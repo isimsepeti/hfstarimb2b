@@ -33,6 +33,8 @@ open http://localhost:8088
 
 ## Canlıya alma (GitHub → cPanel)
 
+İlk kurulum adım adım: [docs/KURULUM.md](docs/KURULUM.md)
+
 1. cPanel > **Git Version Control** > Create: depo URL'si, yol `~/repositories/b2b`.
 2. Değişiklikleri `main`'e push edin, cPanel'de **Update from Remote** → **Deploy HEAD Commit**.
    `.cpanel.yml` yalnızca `site/` klasörünü `~/b2b.hfstarim.com/` altına kopyalar;

@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
-# cPanel'e elle kurulum paketi üretir: dist/b2b-site.zip (+ varsa veritabanı)
-# Kullanım: scripts/build-release.sh [canli-dump.sql]
+# cPanel kurulumu için elle yüklenecek dosyaları üretir (kod GitHub'dan deploy edilir):
+#   dist/b2b-uploads.zip       → ürün görselleri (git dışında)
+#   dist/app.php               → config/app.php şablonu (yeni cron anahtarıyla)
+#   dist/b2b-veritabani.sql    → verilen dump'ın her veritabanı adına yüklenebilir hali
+# Kullanım: scripts/build-release.sh canli-dump.sql [cron_key]
 set -euo pipefail
 cd "$(dirname "$0")/.."
-rm -rf dist && mkdir -p dist/stage
-rsync -a site/ dist/stage/ \
-  --exclude 'config/app.php' --exclude '.DS_Store' \
-  --exclude 'storage/sessions/*' --exclude 'storage/logs/*' --exclude 'storage/cache/*' --exclude 'data/cache/*' \
-  --include '.gitkeep'
-cp site/config/app.example.php dist/stage/config/app.php
-sed -i.bak "s/BURAYA_RASGELE_ANAHTAR/$(openssl rand -hex 16)/" dist/stage/config/app.php && rm dist/stage/config/app.php.bak
-find dist/stage -type d -exec chmod 755 {} + && find dist/stage -type f -exec chmod 644 {} +
-(cd dist/stage && zip -qr -X ../b2b-site.zip .)
-rm -rf dist/stage
-if [ "${1:-}" != "" ]; then
-  scripts/clean-dump.sh "$1" dist/b2b-veritabani.sql >/dev/null
-fi
+dump="$1"; key="${2:-$(openssl rand -hex 16)}"
+mkdir -p dist && rm -f dist/b2b-uploads.zip dist/app.php dist/b2b-veritabani.sql dist/b2b-site.zip
+(cd site && zip -qr -X ../dist/b2b-uploads.zip uploads -x '*.DS_Store')
+sed "s/BURAYA_RASGELE_ANAHTAR/$key/" site/config/app.example.php > dist/app.php
+scripts/clean-dump.sh "$dump" dist/b2b-veritabani.sql >/dev/null
 ls -lh dist
