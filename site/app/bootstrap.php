@@ -7,54 +7,19 @@ HfsDebug::bootEarly();
 date_default_timezone_set('Europe/Istanbul');
 
 $configFile = BMN_ROOT . '/config/app.php';
-$script = (string) ($_SERVER['SCRIPT_NAME'] ?? ($_SERVER['argv'][0] ?? ''));
-$installing = str_contains($script, 'install.php');
-$lockFile = BMN_ROOT . '/storage/install.lock';
-$httpHost = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
 
-if (!$installing && PHP_SAPI !== 'cli' && $httpHost === 'b2b.hfstarim.com' && !is_file($lockFile)) {
-    header('Location: /install.php', true, 302);
-    exit;
-}
-
-if (!is_file($configFile) && !$installing) {
+if (!is_file($configFile)) {
     if (PHP_SAPI !== 'cli') {
-        header('Location: install.php');
+        http_response_code(503);
+        header('Content-Type: text/plain; charset=utf-8');
     }
-    exit;
+    echo "config/app.php yok. config/app.example.php dosyasını kopyalayıp veritabanı bilgilerini girin.\n";
+    exit(1);
 }
 
-if ($installing) {
-    // Canlıya yanlışlıkla yüklenen yerel XAMPP config'i (root / şifresiz) kurulumda kullanılmasın.
-    $GLOBALS['bmn_config'] = [
-        'base' => '',
-        'site_url' => '',
-        'db' => ['host' => 'localhost', 'name' => '', 'user' => '', 'pass' => ''],
-    ];
-    define('BMN_BASE', '');
-} elseif (is_file($configFile)) {
-    $GLOBALS['bmn_config'] = require $configFile;
-    HfsDebug::applyConfig($GLOBALS['bmn_config']);
-    define('BMN_BASE', $GLOBALS['bmn_config']['base'] ?? '');
-    $repairing = str_contains($script, 'db-onar.php');
-    if (
-        !$installing
-        && !$repairing
-        && PHP_SAPI !== 'cli'
-        && $httpHost === 'b2b.hfstarim.com'
-    ) {
-        $du = strtolower((string) ($GLOBALS['bmn_config']['db']['user'] ?? ''));
-        $dp = (string) ($GLOBALS['bmn_config']['db']['pass'] ?? '');
-        $dn = strtolower((string) ($GLOBALS['bmn_config']['db']['name'] ?? ''));
-        if ($du === 'root' || $dp === '' || $dn === 'hfs_bayi' || $dn === 'hfs_b2b') {
-            header('Location: /db-onar.php', true, 302);
-            exit;
-        }
-    }
-} else {
-    $GLOBALS['bmn_config'] = ['db' => ['host' => 'localhost', 'name' => 'hfs_b2b', 'user' => '', 'pass' => '']];
-    define('BMN_BASE', '');
-}
+$GLOBALS['bmn_config'] = require $configFile;
+HfsDebug::applyConfig($GLOBALS['bmn_config']);
+define('BMN_BASE', $GLOBALS['bmn_config']['base'] ?? '');
 
 require BMN_ROOT . '/app/helpers.php';
 require BMN_ROOT . '/app/Database.php';
@@ -86,8 +51,6 @@ require BMN_ROOT . '/app/HfsDiagramSync.php';
 require BMN_ROOT . '/app/HfsPay.php';
 require BMN_ROOT . '/app/HfsSync.php';
 require BMN_ROOT . '/app/HfsSeed.php';
-require BMN_ROOT . '/app/HfsSetup.php';
-require BMN_ROOT . '/app/HfsDeploy.php';
 require BMN_ROOT . '/app/HfsImport.php';
 require BMN_ROOT . '/app/HfsLiveSync.php';
 require BMN_ROOT . '/app/HfsNav.php';
@@ -115,29 +78,27 @@ if (!defined('HFS_SHOP')) {
 bmn_session_start();
 
 $GLOBALS['bmn_user'] = null;
-if (!$installing && is_file($configFile)) {
-    try {
-        bmn_heal_live_urls();
-    } catch (Throwable $e) {
-        HfsDebug::logThrowable($e, 'heal_live_urls');
-    }
-    try {
-        Auth::tryRememberLogin();
-    } catch (Throwable $e) {
-        HfsDebug::logThrowable($e, 'remember_login');
-    }
-    try {
-        $GLOBALS['bmn_user'] = Auth::user();
-    } catch (Throwable $e) {
-        HfsDebug::logThrowable($e, 'auth_user');
-        $GLOBALS['bmn_user'] = null;
-    }
-    try {
-        Migrate::up();
-        Hfs::boot();
-    } catch (Throwable $e) {
-        HfsDebug::logThrowable($e, 'migrate_boot');
-    }
+try {
+    bmn_heal_live_urls();
+} catch (Throwable $e) {
+    HfsDebug::logThrowable($e, 'heal_live_urls');
+}
+try {
+    Auth::tryRememberLogin();
+} catch (Throwable $e) {
+    HfsDebug::logThrowable($e, 'remember_login');
+}
+try {
+    $GLOBALS['bmn_user'] = Auth::user();
+} catch (Throwable $e) {
+    HfsDebug::logThrowable($e, 'auth_user');
+    $GLOBALS['bmn_user'] = null;
+}
+try {
+    Migrate::up();
+    Hfs::boot();
+} catch (Throwable $e) {
+    HfsDebug::logThrowable($e, 'migrate_boot');
 }
 
 if (PHP_SAPI !== 'cli') {

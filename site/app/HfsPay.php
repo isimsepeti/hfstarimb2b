@@ -729,7 +729,11 @@ final class HfsPay
         if ($order) {
             self::applyBulutNotifyToOrder($order, $payload);
         }
-        self::pollVposCancellations(30);
+        // Kimlik doğrulamasız uç nokta: dışarıdan tekrar tekrar çağrılıp Bulut API'sini yormasın.
+        if ((time() - (int) setting('bt_notify_poll_at', '0')) >= 60) {
+            setting_set('bt_notify_poll_at', (string) time());
+            self::pollVposCancellations(30);
+        }
         http_response_code(200);
         echo 'OK';
         exit;

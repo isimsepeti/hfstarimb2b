@@ -9,7 +9,7 @@
         <div class="hfs-ft__grid">
             <div class="hfs-ft__brand">
                 <a class="hfs-ft__brand-link" href="<?= h(site_url()) ?>">
-                    <img class="hfs-ft__logo" src="<?= h(hfs_media('2026/06/hfs-logo.png')) ?>" alt="HFS TARIM" width="200" height="72">
+                    <img class="hfs-ft__logo" src="<?= h(shop_logo()) ?>" alt="HFS TARIM" width="200" height="62">
                 </a>
                 <p class="hfs-ft__lead">Bayileriniz için özel sipariş, cari hesap ve yedek parça portalı. Hasat makinalarında yerli üretim, sahada kanıtlanmış performans.</p>
                 <div class="hfs-ft__cta">

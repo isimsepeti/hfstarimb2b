@@ -31,17 +31,6 @@ final class Front
         self::canonicalizeRequest($method);
 
         $path = request_path();
-        $script = strtolower((string) ($_SERVER['SCRIPT_NAME'] ?? ''));
-        $uri = strtolower((string) ($_SERVER['REQUEST_URI'] ?? ''));
-        $isApply = $path === '/hfs-yayin/'
-            || str_contains($path, 'hfs-apply')
-            || str_contains($script, 'hfs-apply.php')
-            || str_contains($uri, 'hfs-apply.php')
-            || str_contains($uri, 'hfs-yayin');
-        if ($isApply && strtoupper($method) === 'POST') {
-            HfsDeploy::receive();
-            return;
-        }
 
         if (defined('HFS_SHOP') && HFS_SHOP) {
             HfsAuthPassword::enforceMustChange($path);

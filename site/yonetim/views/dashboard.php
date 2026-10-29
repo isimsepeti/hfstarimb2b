@@ -14,9 +14,6 @@
 </div>
 <p>
     <a class="btn" href="<?= h(site_url('yonetim/siparisler/yeni/')) ?>">Panelden sipariş</a>
-    <?php if (($user['role'] ?? current_user()['role'] ?? '') === 'admin'): ?>
-        <a class="btn live" href="<?= h(site_url('yonetim/yayin/')) ?>">Canlıya al</a>
-    <?php endif; ?>
 </p>
 <div class="card">
     <h2>Son siparişler</h2>

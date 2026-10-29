@@ -519,11 +519,6 @@ final class Admin
             return;
         }
 
-        if ($path === '/yonetim/yayin/') {
-            self::deploy($method);
-            return;
-        }
-
         if (AdminShop::dispatch($path, $method)) {
             return;
         }
@@ -672,52 +667,6 @@ final class Admin
             }
         }
         redirect(site_url('yonetim/urunler/' . $id . '/'));
-    }
-
-    private static function deploy(string $method): void
-    {
-        if ((current_user()['role'] ?? '') !== 'admin') {
-            redirect(site_url('yonetim/'));
-        }
-        $err = '';
-        $ok = '';
-        $log = null;
-        if ($method === 'POST' && csrf_ok()) {
-            $intent = (string) ($_POST['intent'] ?? 'save');
-            try {
-                if ($intent === 'save') {
-                    HfsDeploy::saveConfig($_POST);
-                    redirect(site_url('yonetim/yayin/?ok=1'));
-                }
-                if ($intent === 'ftp_test') {
-                    $t = HfsDeploy::testFtp($_POST);
-                    $msg = implode(' ', $t['steps'] ?? []);
-                    if (!empty($t['ok'])) {
-                        $ok = $msg;
-                    } else {
-                        $err = $msg !== '' ? $msg : 'FTP doğrulanamadı.';
-                    }
-                } else {
-                    $log = HfsDeploy::push($intent === 'dry');
-                    $ok = $intent === 'dry' ? 'Paket hazırlandı, canlıya gönderilmedi.' : 'Canlıya alındı.';
-                }
-            } catch (Throwable $e) {
-                $err = $e->getMessage();
-                $log = HfsDeploy::last();
-            }
-        }
-        if ($ok === '' && $err === '') {
-            $log = $log ?? HfsDeploy::last();
-        }
-        self::view('deploy', [
-            'cfg' => HfsDeploy::config(),
-            'ready' => HfsDeploy::ready(),
-            'ftpReady' => HfsDeploy::ftpReady(),
-            'missing' => HfsDeploy::missing(),
-            'last' => $log ?? HfsDeploy::last(),
-            'err' => $err,
-            'ok' => $ok !== '' ? $ok : (!empty($_GET['ok']) ? 'Kaydedildi.' : ''),
-        ]);
     }
 
     private static function view(string $view, array $data = []): void

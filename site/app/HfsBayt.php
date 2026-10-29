@@ -1557,6 +1557,12 @@ final class HfsBayt
         if ($cid < 1) {
             return;
         }
+        // Ekstre her açılışta 20 siparişi tek tek Bayt'a sormasın: firma başına 10 dk'da bir.
+        $tryKey = 'bayt_appr_sync_' . $cid;
+        if ((time() - (int) setting($tryKey, '0')) < 600) {
+            return;
+        }
+        setting_set($tryKey, (string) time());
         $ids = HfsFinance::memberIds($cid);
         if ($ids === []) {
             return;
@@ -1797,20 +1803,31 @@ final class HfsBayt
         }
         $cacheKey = 'bayt_bal_' . $baytId;
         $raw = setting($cacheKey, '');
-        if ($raw !== '') {
-            $j = json_decode($raw, true);
-            if (is_array($j) && (time() - (int) ($j['fetched_at'] ?? 0)) < 300) {
-                return $j;
-            }
+        $cached = $raw !== '' ? json_decode($raw, true) : null;
+        if (is_array($cached) && (time() - (int) ($cached['fetched_at'] ?? 0)) < 300) {
+            return $cached;
+        }
+        // Bu sayfa düzeninde her istekte çağrılır: Bayt yavaş/kapalıyken her sayfa
+        // 45 sn beklemesin diye 120 sn'de en fazla bir deneme; arada eski değer döner.
+        $tryKey = 'bayt_bal_try_' . $baytId;
+        $stale = static fn (string $err): array => is_array($cached) && !empty($cached['ok'])
+            ? $cached + ['stale' => true]
+            : array_merge($empty, ['error' => $err]);
+        if ((time() - (int) setting($tryKey, '0')) < 120) {
+            return $stale('Bayt bakiyesi geçici olarak okunamadı');
+        }
+        try {
+            setting_set($tryKey, (string) time());
+        } catch (Throwable) {
         }
         $auth = self::ensureSession();
         if (is_string($auth)) {
-            return array_merge($empty, ['error' => $auth]);
+            return $stale($auth);
         }
-        $res = self::api('PartnerApiCustomerOperations/GetCustomerById', ['Id' => $baytId], 45);
+        $res = self::api('PartnerApiCustomerOperations/GetCustomerById', ['Id' => $baytId], 20);
         if (is_string($res) || empty($res['Success'])) {
             $msg = is_string($res) ? $res : self::apiMessage($res, 'Bayt bakiyesi okunamadı');
-            return array_merge($empty, ['error' => $msg]);
+            return $stale($msg);
         }
         $d = is_array($res['Data'] ?? null) ? $res['Data'] : [];
         $out = [
@@ -2123,6 +2140,12 @@ final class HfsBayt
     /** @param array<string,string> $headers @return array<string,mixed>|string */
     private static function httpJson(string $url, string $method, ?array $body, array $headers, bool $ssl, int $timeout = 30): array|string
     {
+        // Devre kesici: sunucuya bağlanılamadıysa 2 dk boyunca her istek 10 sn beklemesin.
+        $downKey = 'bayt_down_' . substr(md5(parse_url($url, PHP_URL_HOST) . ':' . parse_url($url, PHP_URL_PORT)), 0, 12);
+        $downUntil = (int) setting($downKey, '0');
+        if ($downUntil > time()) {
+            return 'Bayt sunucusuna bağlanılamıyor (' . date('H:i', $downUntil) . ' sonrası tekrar denenecek).';
+        }
         $hdr = ['Content-Type: application/json', 'Accept: application/json'];
         foreach ($headers as $k => $v) {
             $hdr[] = $k . ': ' . $v;
@@ -2136,7 +2159,7 @@ final class HfsBayt
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => $hdr,
             CURLOPT_TIMEOUT => max(15, $timeout),
-            CURLOPT_CONNECTTIMEOUT => 45,
+            CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_SSL_VERIFYPEER => $ssl,
         ];
         if ($body !== null) {
@@ -2145,9 +2168,16 @@ final class HfsBayt
         curl_setopt_array($ch, $opts);
         $raw = curl_exec($ch);
         $err = curl_error($ch);
+        $errno = curl_errno($ch);
         $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        $connected = (float) curl_getinfo($ch, CURLINFO_CONNECT_TIME) > 0;
         if ($raw === false) {
+            if (!$connected && in_array($errno, [CURLE_COULDNT_CONNECT, CURLE_COULDNT_RESOLVE_HOST, CURLE_OPERATION_TIMEDOUT], true)) {
+                try {
+                    setting_set($downKey, (string) (time() + 120));
+                } catch (Throwable) {
+                }
+            }
             return $err !== '' ? $err : 'HTTP hatası';
         }
         $json = json_decode((string) $raw, true);

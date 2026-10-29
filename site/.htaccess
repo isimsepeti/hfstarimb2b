@@ -1,13 +1,15 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    RewriteRule ^hfs-apply\.php$ - [L]
-    RewriteRule ^hfs-unpak\.php$ - [L]
-    RewriteRule ^database/ - [F,L]
+    # Uygulama içi klasörler web'den erişilemez; tek giriş noktası index.php
+    RewriteRule ^(app|cli|config|data|database|storage)(/|$) - [F,L]
+    RewriteRule ^(themes|yonetim|uploads)/.*\.(php\d?|phtml|phar|inc)$ - [F,L,NC]
+    RewriteRule ^(composer\.(json|lock)|\.git.*|.*\.(sql|zip|log|bak|xlsx|md))$ - [F,L,NC]
 
     RewriteCond %{HTTP_HOST} !^localhost [NC]
     RewriteCond %{HTTP_HOST} !^127\.0\.0\.1
     RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     RewriteRule ^index\.php$ - [L]
@@ -19,6 +21,10 @@
     RewriteRule ^manifest\.webmanifest$ index.php [L]
     RewriteRule ^llms\.txt$ index.php [L]
     RewriteRule ^feed/?$ index.php [L]
+
+    # Olmayan resim/css/js dosyası PHP'yi (ve tüm uygulamayı) çalıştırmasın, doğrudan 404
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule \.(png|jpe?g|gif|webp|avif|svg|ico|css|js|map|woff2?|ttf|eot|pdf)$ - [R=404,L,NC]
 
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -44,5 +50,6 @@
     ModPagespeedDisableFilters rewrite_images,resize_images,recompress_images,convert_jpeg_to_webp,convert_png_to_webp,inline_images
 </IfModule>
 
+ErrorDocument 404 "Not Found"
 DirectoryIndex index.php
 Options -Indexes

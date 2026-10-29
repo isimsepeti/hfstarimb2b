@@ -1,0 +1,26 @@
+services:
+  web:
+    build: ./docker/php
+    ports:
+      - "8088:80"
+    volumes:
+      - ./site:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hfs_b2b
+      MYSQL_USER: hfs
+      MYSQL_PASSWORD: hfs
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/db-init:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  dbdata:

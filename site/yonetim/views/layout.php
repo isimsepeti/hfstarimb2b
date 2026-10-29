@@ -21,9 +21,6 @@ $nav = [
     '/yonetim/epostalar/' => 'E-postalar',
     '/yonetim/ayarlar/' => 'Ayarlar',
 ];
-if (($u['role'] ?? '') === 'admin') {
-    $nav['/yonetim/yayin/'] = 'Canlıya al';
-}
 $css = BMN_ROOT . '/yonetim/assets/admin.css';
 $cssUrl = site_url('yonetim/assets/admin.css') . (is_file($css) ? '?v=' . filemtime($css) : '');
 ?>
