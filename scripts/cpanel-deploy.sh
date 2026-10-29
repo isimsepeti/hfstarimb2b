@@ -22,21 +22,25 @@ protected() {
 mkdir -p "$DEPLOYPATH"
 cp -R "$SRC/." "$DEPLOYPATH/"
 
+# CageFS'te /dev/fd yok: process substitution (< <(...)) yerine düz pipe.
 cd "$DEPLOYPATH"
-removed=0
-while IFS= read -r -d '' f; do
-  rel="${f#./}"
-  if ! protected "$rel" && [ ! -e "$SRC/$rel" ]; then
-    rm -f -- "$f"
-    removed=$((removed + 1))
-  fi
-done < <(find . -type f -print0)
-while IFS= read -r -d '' d; do
+removed=$(find . -type f -print0 | {
+  n=0
+  while IFS= read -r -d '' f; do
+    rel="${f#./}"
+    if ! protected "$rel" && [ ! -e "$SRC/$rel" ]; then
+      rm -f -- "$f"
+      n=$((n + 1))
+    fi
+  done
+  echo "$n"
+})
+find . -mindepth 1 -depth -type d -print0 | while IFS= read -r -d '' d; do
   rel="${d#./}"
   if ! protected "$rel" && [ ! -d "$SRC/$rel" ]; then
     rmdir -- "$d" 2>/dev/null || true
   fi
-done < <(find . -mindepth 1 -depth -type d -print0)
+done
 
 cd "$SRC/.."
 echo "Deploy tamam: $(git rev-parse --short HEAD 2>/dev/null || echo '?') -> $DEPLOYPATH/ (silinen eski dosya: $removed)"
