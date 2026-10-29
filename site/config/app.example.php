@@ -1,4 +1,5 @@
 <?php
+// cPanel'de bu dosyayı config/app.php olarak düzenleyin (git'e girmez).
 return [
     'base' => '',
     'site_url' => 'https://b2b.hfstarim.com',
@@ -7,8 +8,8 @@ return [
     'cron_key' => 'BURAYA_RASGELE_ANAHTAR',
     'db' => [
         'host' => 'localhost',
-        'name' => 'hfs_b2b',
-        'user' => 'DB_KULLANICI',
-        'pass' => 'DB_SIFRE',
+        'name' => 'CPANELKULLANICI_b2b',
+        'user' => 'CPANELKULLANICI_b2b',
+        'pass' => 'DB_SIFRESI',
     ],
 ];

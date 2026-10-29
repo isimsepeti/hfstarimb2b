@@ -1,0 +1,7 @@
+# cPanel > Git Version Control > "Deploy HEAD Commit" ile site/ klasörünü canlıya kopyalar.
+# Sunucuya özel dosyalar (config/app.php, uploads, oturumlar, loglar, cPanel'in php ayarları) korunur.
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/b2b.hfstarim.com/
+    - /bin/rsync -rlptD --delete --exclude 'config/app.php' --exclude 'uploads/20*/' --exclude 'storage/sessions/' --exclude 'storage/logs/' --exclude 'storage/cache/' --exclude 'storage/uploads/reviews/' --exclude 'data/cache/' --exclude '.well-known/' --exclude 'cgi-bin/' --exclude '.user.ini' --exclude 'php.ini' --exclude 'error_log' site/ $DEPLOYPATH
